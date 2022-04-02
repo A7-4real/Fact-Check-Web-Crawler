@@ -41,7 +41,7 @@ class fcSpider(scrapy.Spider):
         author = response.css("div a.icon-link::text").get()
         date = response.css("span span.convert-to-localtime::text").get()
         image_set1 = response.css(
-            "div.single-featureed-thumb-container img::attr(src)").getall()
+            "div.single-featured-thumb-container img::attr(src)").getall()
         image_set2 = response.css(
             "div.image-and-caption-wrapper img::attr(src)").getall()
 
