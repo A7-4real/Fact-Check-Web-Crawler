@@ -1,14 +1,15 @@
+
+import json
 import scrapy
 from Fact_Check_Web_Crawler.items import Metadata, Image_context, FactCheckWebCrawlerItem
 from scrapy.loader import ItemLoader
-from itemadapter import ItemAdapter
 
 
 class fcSpider(scrapy.Spider):
     name = 'boomCrawler-v1'
 
     start_urls = ['https://www.boomlive.in/fact-check/1']
-    article_urls = []
+    metadata_list = []
 
     def start_requests(self):
         urls = [
@@ -38,29 +39,28 @@ class fcSpider(scrapy.Spider):
 
     def parseArticle(self, response):
 
-        l = ItemAdapter(ItemLoader(item=Metadata(), response=response))
+        metadata = ItemLoader(item=Metadata(), response=response)
 
-        l.add_value("news_src", "boomlive.in")
+        metadata.add_value("news_src", "boomlive.in")
         # images from first selector
-        l.add_value("images_url",
-                    response.css("div.single-featured-thumb-container img::attr(src)").getall())
+        metadata.add_value("images_url",
+                           response.css("div.single-featured-thumb-container img::attr(src)").getall())
         # images from second selector
-        l.add_value("images_url",
-                    response.css("div.image-and-caption-wrapper img::attr(src)").getall())
+        metadata.add_value("images_url",
+                           response.css("div.image-and-caption-wrapper img::attr(src)").getall())
         # images from social media embeddings selectors
       # l.add_css("images_url", "youtube-thumbnail, twitter-embeds, instagram-embeds")
-        l.add_value("src_article_url", response.url)
-        l.add_value("article_heading", response.css(
+        metadata.add_value("src_article_url", response.url)
+        metadata.add_value("article_heading", response.css(
             "header h1.is-custom-title::text").get())
-        l.add_value("short_context", response.css("div h2::text").get())
-        l.add_value("short_intro", response.css("div p::text").get())
-        l.add_value("author", response.css("div a.icon-link::text").get())
-        l.add_value("date", response.css(
+        metadata.add_value("short_context", response.css("div h2::text").get())
+        metadata.add_value("short_intro", response.css("div p::text").get())
+        metadata.add_value("author", response.css(
+            "div a.icon-link::text").get())
+        metadata.add_value("date", response.css(
             "span span.convert-to-localtime::text").get())
 
    #     i = ItemLoader(item=Image_context)
-        l = ItemAdapter(l)
-        l = l.asdict(l)
 
         # for image_url in l["images_url"]:
         #     l["images_url"].remove(image_url)
@@ -94,5 +94,4 @@ class fcSpider(scrapy.Spider):
         #     "image_set1": image_set1,
         #     "image_set2": image_set2
         # }
-
-        yield l
+        print(metadata.load_item())
